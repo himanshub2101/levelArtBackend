@@ -12,4 +12,5 @@ export const errorMessage={
     passwordMismatch: { message: 'Password and Confirm Password do not match', statusCode: HttpStatus.BAD_REQUEST },
     userNotFound: { message: 'User not found', statusCode: HttpStatus.NOT_FOUND },
     unauthorizedError: { message: 'Invalid credentials', statusCode: HttpStatus.BAD_REQUEST },
+    authenticationFailed:{message: 'Invalid credentials', statusCode: HttpStatus.BAD_REQUEST}
 }

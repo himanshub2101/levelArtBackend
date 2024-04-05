@@ -1,39 +1,35 @@
-import { Injectable ,Post ,Get, HttpException, UnauthorizedException} from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { AnyARecord } from "dns";
-import { Model } from "mongoose";
-import { AuthSchema } from "src/schemas/auth.schemas";
-import { User } from "src/schemas/user.schema";
-import { errorMessage } from "src/utils/response.util";
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { UserService } from '../../users/services/user.services';
+import { JwtService } from '@nestjs/jwt';
+import { successMessage } from 'src/utils/response.util';
+
 @Injectable()
-export class AuthServices{
+export class AuthServices {
+  constructor(
+    private usersService: UserService,
+    private jwtService: JwtService
+  ) {}
 
-    constructor(@InjectModel(User.name)private userModel: Model<User>) {}
- 
-    async findemail(email:string , password:string): Promise<any>{
-        const user= await this.userModel.find({email,password})
-        return user
+  async signIn(
+    username: string, // Changed parameter name to identifier
+    pass: string,
+  ): Promise<{ access_token: string , message: any}> {
+    let user = await this.usersService.findOne(username); // Try to find user by username
+
+    // If user is not found by username, try to find by email
+    if (!user) {
+      user = await this.usersService.findOneByEmail(username);
     }
 
-    async verifypassword(user:string ,userpassword:string): Promise<any>{
-        const pass= await this.userModel.find({user ,userpassword});
-        return pass
+    // If user is still not found, throw UnauthorizedException
+    if (!user || user.password !== pass) {
+      throw new UnauthorizedException();
     }
-    
 
-    // async login(credentials: AuthSchema): Promise<any> {
-    //     const user = await this.findemail(credentials.email,credentials.password);
-    
-    //     if (!user || !(await this.verifypassword(user, credentials.password))) {
-    //       throw new UnauthorizedException('Invalid credentials');
-    //     }
-    // }
-    
-
-
-   
-   
-
-
-   
+    const payload = { sub: user._id, username: user.username };
+    return {
+      message: successMessage.userLoggedIn,
+      access_token: await this.jwtService.signAsync(payload),
+    };
+  }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put } from "@nestjs/common";
 import { UserService } from "../services/user.services";
 import { User } from "src/schemas/user.schema";
 
@@ -6,11 +6,36 @@ import { User } from "src/schemas/user.schema";
 export class UserController {
     constructor(private userService: UserService ){}
     
-  @Post('/register')
+    @Post('/register')
+    async registerUser(@Body() signUpDto: User): Promise<User> {
+        return this.userService.register(signUpDto);
+    }
 
-async reisterUser (@Body() User: User): Promise<any>{
-const reisterUser = await this.userService.register(User)
-return reisterUser
-}
+    @Get('/')
+    async getAllUsers(): Promise<{ success: boolean; user: User[] }> {
+        return this.userService.findAll();
+    }
 
+    @Get('/:id')
+    async getUserById(@Param('id') id: string): Promise<User> {
+        const user = await this.userService.findbyId(id);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        return user;
+    }
+
+    @Put('/:id')
+    async updateUserById(@Param('id') id: string, @Body() updateUserDto: User): Promise<User> {
+        const updatedUser = await this.userService.updateById(id, updateUserDto);
+        if (!updatedUser) {
+            throw new NotFoundException('User not found');
+        }
+        return updatedUser;
+    }
+
+    @Delete('/:id')
+    async deleteUserById(@Param('id') id: string): Promise<{ success: boolean; message?: any }> {
+        return this.userService.deleteById(id);
+    }
 }

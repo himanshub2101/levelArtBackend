@@ -20,6 +20,12 @@ export class User extends Document {
   @Prop({ required: true })
   phonenumber: string;
 
+
+  @Prop()
+  followers: string[]; // Array of follower user IDs
+
+  @Prop()
+  followings: string[]; // Array of following user IDs
 }
 export const UserSchema = SchemaFactory.createForClass(User);
 
