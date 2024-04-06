@@ -128,5 +128,20 @@ export class PostController {
     }
   }
 
-  
+  @Get('user/:username')
+  async getUserPosts(@Param('username') username: string) {
+    try {
+      // Find the user by username
+      const user = await this.userService.findOneByUsername(username);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Find posts by the user ID
+      const posts = await this.postService.findByUserId(user._id);
+      return posts;
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
 }

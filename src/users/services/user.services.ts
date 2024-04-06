@@ -101,5 +101,9 @@ const findByEmail = await this.userModel.find({email})
   
       return { success: true, message: successMessage.deleteUser };
     }
+
+    async findOneByUsername(username: string): Promise<User | null> {
+      return this.userModel.findOne({ username }).exec();
+    }
 }
 

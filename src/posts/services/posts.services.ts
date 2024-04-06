@@ -77,4 +77,8 @@ export class PostService {
     const following = user.followings;
     return this.postModel.find({ postedBy: { $in: following } }).sort({ createdAt: -1 }).exec();
   }
+
+  async findByUserId(userId: string): Promise<Posts[]> {
+    return this.postModel.find({ postedBy: userId }).sort({ createdAt: -1 }).exec();
+  }
 }

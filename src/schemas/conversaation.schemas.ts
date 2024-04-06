@@ -7,7 +7,7 @@ interface LastMessage {
   sender: string;
 }
 
-@Schema()
+@Schema({ timestamps: true })
 export class Conversation extends Document {
   @Prop([String])
   participants: string[];
