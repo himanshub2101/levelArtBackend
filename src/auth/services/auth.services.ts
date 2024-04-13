@@ -1,7 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UserService } from '../../users/services/user.services';
-import { JwtService } from '@nestjs/jwt';
-import { successMessage } from 'src/utils/response.util';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { UserService } from "src/users/services/user.services";
+import { successMessage } from "src/utils/response.util";
 
 @Injectable()
 export class AuthServices {
@@ -10,26 +10,29 @@ export class AuthServices {
     private jwtService: JwtService
   ) {}
 
-  async signIn(
-    username: string, // Changed parameter name to identifier
-    pass: string,
-  ): Promise<{ access_token: string , message: any}> {
-    let user = await this.usersService.findOne(username); // Try to find user by username
+  async signIn(username: string, pass: string): Promise<{ access_token: string, message: any }> {
+    try {
+      let user = await this.usersService.findOne(username);
 
-    // If user is not found by username, try to find by email
-    if (!user) {
-      user = await this.usersService.findOneByEmail(username);
+      if (!user) {
+        user = await this.usersService.findOneByEmail(username);
+      }
+
+      if (!user || user.password !== pass) {
+        throw new UnauthorizedException();
+      }
+
+      const payload = { sub: user._id, username: user.email };
+      const access_token = await this.jwtService.signAsync(payload);
+
+      return {
+        message: successMessage.userLoggedIn,
+        access_token
+      };
+    } catch (error) {
+      // Log the error for debugging purposes
+      console.error('Error during login:', error);
+      throw new UnauthorizedException('Invalid credentials');
     }
-
-    // If user is still not found, throw UnauthorizedException
-    if (!user || user.password !== pass) {
-      throw new UnauthorizedException();
-    }
-
-    const payload = { sub: user._id, username: user.username };
-    return {
-      message: successMessage.userLoggedIn,
-      access_token: await this.jwtService.signAsync(payload),
-    };
   }
 }

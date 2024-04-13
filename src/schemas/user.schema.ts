@@ -5,19 +5,19 @@ import mongoose, { Document, Model } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class User extends Document {
-  @Prop({ required: true })
+  @Prop()
   username: string;
 
-  @Prop({ unique: true, required: true })
+  @Prop()
   email: string;
 
-  @Prop({ required: true })
+  @Prop()
   password: string;
 
-  @Prop({ required: true })
+  @Prop()
   confirmpassword: string;
 
-  @Prop({ required: true })
+  @Prop()
   phonenumber: string;
 
   @Prop({ default: [] })

@@ -14,6 +14,7 @@ export class UserService {
         const {username,password, confirmpassword, email,phonenumber} = signUpDto
 
 
+        
         const user = await this.userModel.create({email,username,password,confirmpassword,phonenumber})
        
         return user.save()

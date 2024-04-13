@@ -5,6 +5,7 @@ import { PostService } from '../services/posts.services';
 import { cloudinary } from '../../cloudinary/cloudinary.config'; 
 import { Posts } from 'src/schemas/posts.schema';
 import { AuthGuard } from 'src/auth/auth.guard';
+import * as jwt from 'jsonwebtoken'; // Import JWT library
 
 
 
@@ -14,46 +15,90 @@ export class PostController {
     private readonly userService: UserService,
     private readonly postService: PostService,
   ) {}
+  private extractUserIdFromToken(token: string): string {
+  // Check if the token starts with "Bearer " and remove it if present
+  const tokenWithoutBearer = token.startsWith('Bearer ') ? token.slice(7) : token;
 
-  @Post()
-  async createPost(@Body() body: any, @Req() req: Request, @Res() res: Response) {
-    try {
-      const { postedBy, text } = body;
-      let { img } = body;
-
-      if (!postedBy || !text) {
-        return res.status(400).json({ error: "Postedby and text fields are required" });
-      }
-
-      const user = await this.userService.findById(postedBy);
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-
-      if (user._id.toString() !== req['user']._id.toString()) {
-        return res.status(401).json({ error: "Unauthorized to create post" });
-      }
-
-      const maxLength = 500;
-      if (text.length > maxLength) {
-        return res.status(400).json({ error: `Text must be less than ${maxLength} characters` });
-      }
-
-      if (img) {
-        const uploadedResponse = await cloudinary.uploader.upload(img);
-        img = uploadedResponse.secure_url;
-      }
-
-      const newPost = await this.postService.create({ postedBy, text, img });
-
-      res.status(201).json(newPost);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-      console.log(err);
-    }
+  // Decode the JWT token to extract user ID
+  const decodedToken = jwt.decode(tokenWithoutBearer);
+  if (!decodedToken || typeof decodedToken !== 'object' || !decodedToken.hasOwnProperty('sub')) {
+    throw new Error('Invalid JWT token');
   }
 
-  @Get(':id')
+  return decodedToken.sub; // Assuming the user ID is stored in the 'sub' property
+}
+
+@UseGuards(AuthGuard)
+  @Post('create-post')
+  async createPost(@Body() body: any, @Req() req: Request, @Res() res: Response) {
+    try {
+      console.log('Request Body:', body);
+  
+      const { postedBy, text } = body;
+      let { img } = body;
+  
+      console.log('postedBy:', postedBy);
+      console.log('text:', text);
+  
+      if (!postedBy || !text) {
+        console.log('Missing required fields');
+        return res.status(400).json({ error: "Postedby and text fields are required" });
+      }
+  
+      console.log('Checking authentication...');
+      console.log('Request Headers:', req.headers);
+  
+      const authToken = req.headers.authorization;
+      if (!authToken) {
+        console.log('No authentication token provided');
+        return res.status(401).json({ error: "Unauthorized: No authentication token provided" });
+      }
+  
+      const userId = this.extractUserIdFromToken(authToken);
+  
+      console.log('Authenticated User ID:', userId);
+  
+      const user = await this.userService.findById(postedBy);
+      console.log('User found:', user);
+      if (!user) {
+        console.log('User not found');
+        return res.status(404).json({ error: "User not found" });
+      }
+  
+      // Check if the postedBy user matches the authenticated user
+      if (user._id.toString() !== userId.toString()) {
+        console.log('Unauthorized to create post');
+        return res.status(401).json({ error: "Unauthorized to create post" });
+      }
+  
+      const maxLength = 500;
+      if (text.length > maxLength) {
+        console.log('Text exceeds maximum length');
+        return res.status(400).json({ error: `Text must be less than ${maxLength} characters` });
+      }
+  
+      if (img) {
+        console.log('Uploading image...');
+        const uploadedResponse = await cloudinary.uploader.upload(img);
+        img = uploadedResponse.secure_url;
+        console.log('Image uploaded:', img);
+      }
+  
+      console.log('Creating new post...');
+      const newPost = await this.postService.create({ postedBy, text, img });
+      console.log('New post created:', newPost);
+  
+      res.status(201).json(newPost);
+    } catch (err) {
+      console.error('Error:', err);
+      res.status(500).json({ error: err.message });
+    }
+  }
+  
+  
+  
+  @UseGuards(AuthGuard)
+  @Get('get/:id')
   async getPost(@Param('id') id: string): Promise<Posts> {
     try {
       return await this.postService.findById(id);
@@ -66,6 +111,7 @@ export class PostController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Delete(':id')
   async deletePost(@Param('id') id: string, @Req() req: Request, @Res() res: Response) {
     try {
@@ -96,6 +142,7 @@ export class PostController {
     }
   }
   
+  @UseGuards(AuthGuard)
   @Post(':id/replies')
   async replyToPost(
     @Param('id') postId: string,
@@ -116,18 +163,41 @@ export class PostController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get()
   @UseGuards(AuthGuard)
   async getFeedPosts(@Req() req: Request, @Res() res: Response) {
     try {
-      const userId =  req['user']
+      // Ensure that user information is available in the request
+      if (!req.hasOwnProperty('user')) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+  
+      // Extract the user ID from the request
+      const user = req['user'];
+      console.log('User:', user);
+  
+      const userId = user.sub;
+      console.log('User ID:', userId);
+  
+      // Check if the user ID is valid
+      if (!userId) {
+        return res.status(400).json({ error: 'Invalid user ID' });
+      }
+  
+      // Fetch feed posts for the user
       const feedPosts = await this.postService.getFeedPosts(userId);
+
+      console.log("feedPosts:",feedPosts)
       res.status(200).json(feedPosts);
     } catch (err) {
+      // Handle any errors that occur during the process
       res.status(500).json({ error: err.message });
     }
   }
+      
 
+  @UseGuards(AuthGuard)
   @Get('user/:username')
   async getUserPosts(@Param('username') username: string) {
     try {

@@ -8,8 +8,9 @@ import {
   Request,
   UseGuards
 } from '@nestjs/common';
-import { AuthGuard } from '../auth.guard';
+import { AuthGuard } from '../auth.guard'; // Remove this import
 import { AuthServices } from '../services/auth.services';
+import { User } from 'src/schemas/user.schema';
 
 @Controller('auth')
 export class AuthController {
@@ -17,13 +18,25 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  signIn(@Body() signInDto: Record<string, any>) {
-    return this.authService.signIn(signInDto.username, signInDto.password);
+  signIn(@Body() signInDto: User) {
+    try {
+      return this.authService.signIn(signInDto.email, signInDto.password);
+    } catch (error) {
+      console.error('Error during login:', error);
+      throw new Error('Login failed'); // Handle login failure appropriately
+    }
   }
 
-  @UseGuards(AuthGuard)
+  // Remove the @UseGuards(AuthGuard) decorator from here
+
+  @UseGuards(AuthGuard) // Apply the AuthGuard to the profile endpoint
   @Get('profile')
   getProfile(@Request() req) {
-    return req.user;
+    try {
+      return req.user;
+    } catch (error) {
+      console.error('Error retrieving user profile:', error);
+      throw new Error('Unable to retrieve user profile'); // Handle profile retrieval failure
+    }
   }
 }
