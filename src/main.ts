@@ -12,6 +12,7 @@ async function bootstrap() {
     // allowedHeaders: ['Authorization', 'Content-Type'], // Allow specific headers
   }));
 
+  
   await app.listen(3000);
 }
 bootstrap();
