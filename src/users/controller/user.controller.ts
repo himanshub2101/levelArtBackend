@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, Post, Put } from "@nestjs/common";
 import { UserService } from "../services/user.services";
 import { User } from "src/schemas/user.schema";
 
@@ -8,6 +8,22 @@ export class UserController {
     
     @Post('/register')
     async registerUser(@Body() signUpDto: User): Promise<User> {
+
+        const isExistingUserEmail = await this.userService.findEmail(signUpDto.email)
+        const isExistingUserPhone = await this.userService.findEmail(signUpDto.phonenumber)
+
+        if(isExistingUserEmail){
+
+            throw new HttpException("Email is already registred", HttpStatus.BAD_REQUEST)
+        }
+
+        
+        if(isExistingUserPhone){
+
+            throw new HttpException("Phone number is already registred", HttpStatus.BAD_REQUEST)
+        }
+
+        
         return this.userService.register(signUpDto);
     }
 
