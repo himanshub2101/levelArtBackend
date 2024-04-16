@@ -29,73 +29,70 @@ export class PostController {
 }
 
 @UseGuards(AuthGuard)
-  @Post('create-post')
-  async createPost(@Body() body: any, @Req() req: Request, @Res() res: Response) {
-    try {
-      console.log('Request Body:', body);
-  
-      const { postedBy, text } = body;
-      let { img } = body;
-  
-      console.log('postedBy:', postedBy);
-      console.log('text:', text);
-  
-      if (!postedBy || !text) {
-        console.log('Missing required fields');
-        return res.status(400).json({ error: "Postedby and text fields are required" });
-      }
-  
-      console.log('Checking authentication...');
-      console.log('Request Headers:', req.headers);
-  
-      const authToken = req.headers.authorization;
-      if (!authToken) {
-        console.log('No authentication token provided');
-        return res.status(401).json({ error: "Unauthorized: No authentication token provided" });
-      }
-  
-      const userId = this.extractUserIdFromToken(authToken);
-  
-      console.log('Authenticated User ID:', userId);
-  
-      const user = await this.userService.findById(postedBy);
-      console.log('User found:', user);
-      if (!user) {
-        console.log('User not found');
-        return res.status(404).json({ error: "User not found" });
-      }
-  
-      // Check if the postedBy user matches the authenticated user
-      if (user._id.toString() !== userId.toString()) {
-        console.log('Unauthorized to create post');
-        return res.status(401).json({ error: "Unauthorized to create post" });
-      }
-  
-      const maxLength = 500;
-      if (text.length > maxLength) {
-        console.log('Text exceeds maximum length');
-        return res.status(400).json({ error: `Text must be less than ${maxLength} characters` });
-      }
-  
-      if (img) {
-        console.log('Uploading image...');
-        const uploadedResponse = await cloudinary.uploader.upload(img);
-        img = uploadedResponse.secure_url;
-        console.log('Image uploaded:', img);
-      }
-  
-      console.log('Creating new post...');
-      const newPost = await this.postService.create({ postedBy, text, img });
-      console.log('New post created:', newPost);
-  
-      res.status(201).json(newPost);
-    } catch (err) {
-      console.error('Error:', err);
-      res.status(500).json({ error: err.message });
+@Post('create-post')
+async createPost(@Body() body: any, @Req() req: Request, @Res() res: Response) {
+  try {
+    console.log('Request Body:', body);
+    const { postedBy, text } = body;
+    let { img } = body;
+
+    console.log('postedBy:', postedBy);
+    console.log('text:', text);
+
+    if (!postedBy || !text) {
+      console.log('Missing required fields');
+      return res.status(400).json({ error: "Postedby and text fields are required" });
     }
+
+    console.log('Checking authentication...');
+    console.log('Request Headers:', req.headers);
+
+    const authToken = req.headers.authorization;
+    if (!authToken) {
+      console.log('No authentication token provided');
+      return res.status(401).json({ error: "Unauthorized: No authentication token provided" });
+    }
+
+    const userId = this.extractUserIdFromToken(authToken);
+    console.log('Authenticated User ID:', userId);
+
+    const user = await this.userService.findById(postedBy);
+    console.log('User found:', user);
+
+    if (!user) {
+      console.log('User not found');
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Ensure that the userId extracted from the token matches the user._id from the database
+    if (user._id.toString() !== userId) {
+      console.log('Unauthorized to create post');
+      return res.status(401).json({ error: "Unauthorized to create post" });
+    }
+
+    const maxLength = 500;
+    if (text.length > maxLength) {
+      console.log('Text exceeds maximum length');
+      return res.status(400).json({ error: `Text must be less than ${maxLength} characters` });
+    }
+
+    if (img) {
+      console.log('Uploading image...');
+      const uploadedResponse = await cloudinary.uploader.upload(img);
+      img = uploadedResponse.secure_url;
+      console.log('Image uploaded:', img);
+    }
+
+    console.log('Creating new post...');
+    const newPost = await this.postService.create({ postedBy, text, img });
+    console.log('New post created:', newPost);
+
+    res.status(201).json(newPost);
+  } catch (err) {
+    console.error('Error:', err);
+    res.status(500).json({ error: err.message });
   }
-  
-  
+}
   
   @UseGuards(AuthGuard)
   @Get('get/:id')
@@ -198,7 +195,7 @@ export class PostController {
       
 
   @UseGuards(AuthGuard)
-  @Get('user/:username')
+  @Get('user/:id')
   async getUserPosts(@Param('username') username: string) {
     try {
       // Find the user by username
