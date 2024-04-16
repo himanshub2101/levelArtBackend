@@ -196,19 +196,21 @@ async createPost(@Body() body: any, @Req() req: Request, @Res() res: Response) {
 
   @UseGuards(AuthGuard)
   @Get('user/:id')
-  async getUserPosts(@Param('username') username: string) {
+  async getUserPosts(@Param('id') userId: string) {
     try {
-      // Find the user by username
-      const user = await this.userService.findOneByUsername(username);
+      // Find the user by user ID
+      const user = await this.userService.findById(userId);
       if (!user) {
         throw new NotFoundException('User not found');
       }
-
+  
       // Find posts by the user ID
-      const posts = await this.postService.findByUserId(user._id);
+      const posts = await this.postService.findByUserId(userId);
       return posts;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
   }
-}
+  }
+
+
