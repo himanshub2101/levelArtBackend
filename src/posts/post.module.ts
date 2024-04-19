@@ -8,6 +8,7 @@ import { UserService } from 'src/users/services/user.services';
 
 @Module({
   imports: [
+   
     MongooseModule.forFeature([{ name: Posts.name, schema: PostsSchema }]),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],

@@ -11,9 +11,11 @@ import { PostService } from './posts/services/posts.services';
 import { Posts, PostsSchema } from './schemas/posts.schema';
 import { AuthMiddleware } from './auth/auth.middleware';
 import { FollowersModule } from './followers/followers.module';
+import { multerConfig } from './multer.config';
+import { MulterModule } from '@nestjs/platform-express/multer';
 
 @Module({
-  imports: [
+  imports: [    MulterModule.register(multerConfig),
     FollowersModule,
     PostModule, // Add PostModule here
     ConversationModule,

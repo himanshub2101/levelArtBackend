@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, Res, NotFoundException, InternalServerErrorException, Get, Param, UnauthorizedException, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Req, Res, NotFoundException, InternalServerErrorException, Get, Param, UnauthorizedException, Delete, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { UserService } from 'src/users/services/user.services';
 import { PostService } from '../services/posts.services';
@@ -6,6 +6,8 @@ import { cloudinary } from '../../cloudinary/cloudinary.config';
 import { Posts } from 'src/schemas/posts.schema';
 import { AuthGuard } from 'src/auth/auth.guard';
 import * as jwt from 'jsonwebtoken'; // Import JWT library
+import { diskStorage } from 'multer';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 
 
@@ -30,12 +32,11 @@ export class PostController {
 
 @UseGuards(AuthGuard)
 @Post('create-post')
-async createPost(@Body() body: any, @Req() req: Request, @Res() res: Response) {
+@UseInterceptors(FileInterceptor('img')) 
+async createPost( @UploadedFile() file: Express.Multer.File,@Body() body: any, @Req() req: Request, @Res() res: Response) {
   try {
     console.log('Request Body:', body);
-    const { postedBy, text } = body;
-    let { img } = body;
-
+    const { postedBy, text ,} = body;
     console.log('postedBy:', postedBy);
     console.log('text:', text);
 
@@ -75,10 +76,10 @@ async createPost(@Body() body: any, @Req() req: Request, @Res() res: Response) {
       console.log('Text exceeds maximum length');
       return res.status(400).json({ error: `Text must be less than ${maxLength} characters` });
     }
-
-    if (img) {
+let img = null
+    if (file) {
       console.log('Uploading image...');
-      const uploadedResponse = await cloudinary.uploader.upload(img);
+      const uploadedResponse = await cloudinary.uploader.upload(file.path);
       img = uploadedResponse.secure_url;
       console.log('Image uploaded:', img);
     }
