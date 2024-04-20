@@ -63,7 +63,7 @@ async createPost(
     const userId = this.extractUserIdFromToken(authToken);
     console.log('Authenticated User ID:', userId);
 
-    const user = await this.userService.findById(postedBy);
+    const user = await this.userService.findOneById(postedBy);
     console.log('User found:', user);
 
     if (!user) {
@@ -208,7 +208,7 @@ async createPost(
   async getUserPosts(@Param('id') userId: string) {
     try {
       // Find the user by user ID
-      const user = await this.userService.findById(userId);
+      const user = await this.userService.findOneById(userId);
       if (!user) {
         throw new NotFoundException('User not found');
       }

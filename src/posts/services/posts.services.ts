@@ -68,7 +68,7 @@ export class PostService {
   }
 
   async getFeedPosts(userId: string): Promise<Posts[]> {
-    const user = await this.userService.findById(userId);
+    const user = await this.userService.findOneById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
