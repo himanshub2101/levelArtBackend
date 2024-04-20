@@ -8,6 +8,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import * as jwt from 'jsonwebtoken'; // Import JWT library
 import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CreatePostDto } from 'src/dto/posts.dto';
 
 
 
@@ -33,10 +34,15 @@ export class PostController {
 @UseGuards(AuthGuard)
 @Post('create-post')
 @UseInterceptors(FileInterceptor('img')) 
-async createPost( @UploadedFile() file: Express.Multer.File,@Body() body: any, @Req() req: Request, @Res() res: Response) {
+async createPost(
+  @UploadedFile() file: Express.Multer.File,
+  @Body() body: any,
+  @Req() req: Request,
+  @Res() res: Response
+) {
   try {
     console.log('Request Body:', body);
-    const { postedBy, text ,} = body;
+    const { postedBy, text } = body;
     console.log('postedBy:', postedBy);
     console.log('text:', text);
 
@@ -76,7 +82,8 @@ async createPost( @UploadedFile() file: Express.Multer.File,@Body() body: any, @
       console.log('Text exceeds maximum length');
       return res.status(400).json({ error: `Text must be less than ${maxLength} characters` });
     }
-let img = null
+
+    let img = null;
     if (file) {
       console.log('Uploading image...');
       const uploadedResponse = await cloudinary.uploader.upload(file.path);
@@ -94,7 +101,8 @@ let img = null
     res.status(500).json({ error: err.message });
   }
 }
-  
+
+
   @UseGuards(AuthGuard)
   @Get('get/:id')
   async getPost(@Param('id') id: string): Promise<Posts> {
