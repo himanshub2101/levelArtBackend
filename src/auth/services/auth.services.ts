@@ -12,7 +12,7 @@ export class AuthServices {
 
   async signIn(username: string, pass: string): Promise<{ access_token: string, message: any }> {
     try {
-      let user = await this.usersService.findOne(username);
+      let user = await this.usersService.findOneById(username);
 
       if (!user) {
         user = await this.usersService.findOneByEmail(username);

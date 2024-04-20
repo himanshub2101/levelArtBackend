@@ -5,6 +5,7 @@ import { Posts, PostDocument } from '../../schemas/posts.schema';
 import { ObjectId } from 'mongodb';
 import { User } from 'src/schemas/user.schema';
 import { UserService } from 'src/users/services/user.services';
+import { CreatePostDto } from 'src/dto/posts.dto';
 
 @Injectable()
 export class PostService {

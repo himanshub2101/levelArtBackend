@@ -31,8 +31,8 @@ import bodyParser from 'body-parser';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(AuthMiddleware).forRoutes('auth/profile');
-    consumer.apply(bodyParser.json({ limit: '50mb' })).forRoutes('*');
-    consumer.apply(bodyParser.urlencoded({ extended: true, limit: '50mb' })).forRoutes('*');
+    // consumer.apply(bodyParser.json({ limit: '50mb' })).forRoutes('*');
+    // consumer.apply(bodyParser.urlencoded({ extended: true, limit: '50mb' })).forRoutes('*');
 
     // consumer.apply(AuthMiddleware).forRoutes('posts/create-post'); 
 

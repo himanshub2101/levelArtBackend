@@ -1,110 +1,60 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import {InjectModel}from "@nestjs/mongoose"
-import { User } from "src/schemas/user.schema";
-import { Model } from 'mongoose'; // Import the Model type from mongoose
-import { errorMessage, successMessage } from "src/utils/response.util";
+// user.service.ts
+
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User } from '../../schemas/user.schema';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
-
 export class UserService {
-    constructor(@InjectModel(User.name)private userModel: Model<User>) {}
+  constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {}
 
-      async register(signUpDto: User): Promise<User> {
-    
-        const {username,password, confirmpassword, email,phonenumber} = signUpDto
+  async register(signUpDto: User): Promise<User> {
+    const { username, password, email, phonenumber } = signUpDto;
 
-
-        
-        const user = await this.userModel.create({email,username,password,confirmpassword,phonenumber})
-       
-        return user.save()
+    // Check if the email is already registered
+    const existingUser = await this.userModel.findOne({ email }).exec();
+    if (existingUser) {
+      throw new ConflictException('User with this email already exists');
     }
 
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    async findEmail(email: string):Promise<User[]>{
+    // Create and save the user
+    const user = new this.userModel({ username, password: hashedPassword, email, phonenumber });
+    const newUser = await user.save();
 
-const findByEmail = await this.userModel.find({email})
-
-          return findByEmail
-    }
-
-
-    async findOne(username: string): Promise<User | undefined> {
-      return this.userModel.findOne({ username: username }).exec();
+    const { confirmpassword: _, ...registeredUser } = newUser.toObject();
+    return registeredUser as User;
   }
 
-  async findOneByEmail(email: string): Promise<User | undefined> {
-    return this.userModel.findOne({ email: email }).exec();
+  async findOneByEmail(email: string): Promise<User | null> {
+    return this.userModel.findOne({ email }).exec();
   }
 
-  async findById(userId: string): Promise<User | undefined> {
-    return this.userModel.findById(userId).lean().exec();
+  async findOneById(id: string): Promise<User | null> {
+    return this.userModel.findById(id).exec();
   }
 
-  async findManyByIds(userIds: string[]): Promise<User[]> {
-    return this.userModel.find({ _id: { $in: userIds } }).lean().exec();
-  }  
- 
-  
-    //Get all the users
-    async findAll(): Promise<{ success: boolean; user: User[] }> {
-      const user = await this.userModel.find();
-      return { success: true, user };
+  async updateUser(id: string, updateUserDto: Partial<User>): Promise<User> {
+    const user = await this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true }).exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
-  
-    //Fetch Unique user by id
-    async findbyId(id: string): Promise<User> {
-      try {
-        const user = await this.userModel.findById(id);
-        if (!user) {
-          console.log(`User with ID ${id} not found.`);
-          throw new NotFoundException('User not found');
-        }
-        return user;
-      } catch (error) {
-        // Log the error for further investigation
-        console.error('Error in findbyId:', error);
-        throw error; // Rethrow the error
-      }
-    }
-  
-    //Update user by id
-    async updateById(id: string, updateUserDto: User): Promise<User> {
-      // Find the user by ID
-      const existingUser = await this.userModel.findById(id);
-  
-      // If user not found, throw NotFoundException
-      if (!existingUser) {
-        throw new NotFoundException('User not found');
-      }
-  
-      Object.assign(existingUser, updateUserDto);
-  
-      // Save the updated user
-      const updatedUserData = await existingUser.save();
-  
-      return updatedUserData;
-    }
-  
-    async deleteById(
-      id: string,
-    ): Promise<{ success: boolean; message?: any }> {
-      // Find the user by ID
-      const existingUser = await this.userModel.findById(id);
-  
-      // If user not found, throw NotFoundException
-      if (!existingUser) {
-        throw new NotFoundException(errorMessage.userNotFound);
-      }
-      await this.userModel.deleteOne({ user: existingUser._id });
-      // Delete the user
-      await this.userModel.deleteOne({ _id: id });
-  
-      return { success: true, message: successMessage.deleteUser };
-    }
+    return user;
+  }
 
-    async findOneByUsername(username: string): Promise<User | null> {
-      return this.userModel.findOne({ username }).exec();
+  async deleteUser(id: string): Promise<{ success: boolean }> {
+    const result = await this.userModel.deleteOne({ _id: id }).exec();
+    if (result.deletedCount === 0) {
+      throw new NotFoundException('User not found');
     }
+    return { success: true };
+  }
+
+  async findAllUsers(): Promise<User[]> {
+    return this.userModel.find().exec();
+  }
 }
-

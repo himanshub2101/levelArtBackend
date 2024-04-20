@@ -23,7 +23,11 @@ export class Posts extends Document {
     userProfilePic: string;
     username: string;
   }[];
+  
+  @Prop({ readonly: true }) // Make username read-only
+  username: string;
 }
+
 
 export const PostsSchema = SchemaFactory.createForClass(Posts);
 export type PostDocument = Posts & Document; // Define PostDocument type

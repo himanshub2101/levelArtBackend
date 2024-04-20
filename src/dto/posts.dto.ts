@@ -6,6 +6,8 @@ export class CreatePostDto {
   @IsString()
   @MaxLength(500)
   text: string;
+  
+  readonly userId: string;
 
   @IsOptional()
   @IsUrl()
