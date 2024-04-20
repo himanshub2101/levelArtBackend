@@ -19,7 +19,7 @@ export class AuthMiddleware implements NestMiddleware {
       const userId = this.extractUserIdFromToken(authToken);
 
       // Retrieve user data based on the user ID
-      const user = await this.userService.findById(userId);
+      const user = await this.userService.findOneById(userId);
       if (!user) {
         return res.status(401).json({ error: 'Unauthorized: Invalid user ID' });
       }
