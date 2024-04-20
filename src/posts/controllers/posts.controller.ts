@@ -36,15 +36,13 @@ export class PostController {
 @UseInterceptors(FileInterceptor('img')) 
 async createPost(
   @UploadedFile() file: Express.Multer.File,
-  @Body() body: any,
+  @Body() body: any, // Assuming you have a DTO for creating posts
   @Req() req: Request,
   @Res() res: Response
 ) {
   try {
     console.log('Request Body:', body);
     const { postedBy, text } = body;
-    console.log('postedBy:', postedBy);
-    console.log('text:', text);
 
     if (!postedBy || !text) {
       console.log('Missing required fields');
@@ -91,8 +89,12 @@ async createPost(
       console.log('Image uploaded:', img);
     }
 
+    // Get the username from the authenticated user
+    const authenticatedUser = req['user']; // Assuming the user information is available in the request
+    const username = authenticatedUser.username; // Assuming the username is stored in the 'username' property
+
     console.log('Creating new post...');
-    const newPost = await this.postService.create({ postedBy, text, img });
+    const newPost = await this.postService.create({ postedBy, text, img, username }); // Include the username in the post data
     console.log('New post created:', newPost);
 
     res.status(201).json(newPost);
@@ -101,6 +103,7 @@ async createPost(
     res.status(500).json({ error: err.message });
   }
 }
+
 
 
   @UseGuards(AuthGuard)
