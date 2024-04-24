@@ -1,9 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as cors from 'cors'; // Import cors middleware
+import * as dotenv from 'dotenv';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  dotenv.config();
+  console.log("DATABASE_URL:", process.env.DATABASE_URL); // Debugging
 
   // Enable CORS for all routes
   app.use(cors({
@@ -13,6 +16,6 @@ async function bootstrap() {
   }));
 
   
-  await app.listen(3000);
+  await app.listen(process.env.PORT || 3000);
 }
 bootstrap();

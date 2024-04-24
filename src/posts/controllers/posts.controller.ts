@@ -10,8 +10,6 @@ import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreatePostDto } from 'src/dto/posts.dto';
 
-
-
 @Controller('posts')
 export class PostController {
   constructor(
@@ -223,6 +221,19 @@ async createPost(
       throw new InternalServerErrorException(error.message);
     }
   }
+  
+  @UseGuards(AuthGuard)
+  @Post(':postId/like')
+  async handleLike(@Param('postId') postId: string, @Req() req: Request) {
+    try {
+      // Extract the user ID from the request object
+      const userId = req['user'].sub;
+      console.log("userId:",postId)
+      await this.postService.likeUnlikePost(postId, userId);
+
+      return { message: 'Post liked/unliked successfully' };
+    } catch (error) {
+      throw error; // Let the global exception filter handle the error
+    }
   }
-
-
+}
