@@ -15,6 +15,7 @@ import { multerConfig } from './multer.config';
 import { MulterModule } from '@nestjs/platform-express/multer';
 import bodyParser from 'body-parser';
 import { NotificationModule } from './notifications/notification.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [    MulterModule.register(multerConfig),
@@ -24,6 +25,7 @@ import { NotificationModule } from './notifications/notification.module';
     NotificationModule,
     AuthModule,
     UserModule,
+    SearchModule,
     MongooseModule.forRoot('mongodb+srv://himanshubaghel7723:p6eoUVJJjvjkasKB@cluster0.tdpw1ax.mongodb.net/'),
     MongooseModule.forFeature([{ name: Posts.name, schema: PostsSchema }]), // Add this line
   ],
