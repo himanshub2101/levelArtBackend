@@ -16,4 +16,4 @@ import { UserService } from 'src/users/services/user.services';
   providers: [PostService,UserService],
   exports: [UserService]
 })
-export class PostModule {}
+export class PostModule {} 
