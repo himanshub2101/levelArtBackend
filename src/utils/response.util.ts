@@ -1,16 +1,41 @@
 import { HttpStatus } from "@nestjs/common";
 
-export const successMessage={
+export const successMessage = {
     userCreated: { message: 'User created successfully', statusCode: HttpStatus.CREATED },
     userLoggedIn: { message: 'User logged in successfully', statusCode: HttpStatus.OK },
     forgotpasswordMessage: { message: "Link sent successfully", statusCode: HttpStatus.OK },
     deleteUser: { message: 'User deleted successfully', statusCode: HttpStatus.OK },
+    notificationCreated: { message: 'Notification created successfully', statusCode: HttpStatus.CREATED },
+    notificationUpdated: { message: 'Notification updated successfully', statusCode: HttpStatus.OK },
+    notificationDeleted: { message: 'Notification deleted successfully', statusCode: HttpStatus.OK },
+    notificationFound: { message: 'Notification found', statusCode: HttpStatus.OK },
+    postCreated: { message: 'Post created successfully', statusCode: HttpStatus.CREATED },
+    postDeleted: { message: 'Post deleted successfully', statusCode: HttpStatus.OK },
+    postFound: { message: 'Post found', statusCode: HttpStatus.OK },
+    postLiked: { message: 'Post liked/unliked successfully', statusCode: HttpStatus.OK },
+    postReplied: { message: 'Replied to post successfully', statusCode: HttpStatus.CREATED },
 }
 
-export const errorMessage={
+export const errorMessage = {
     userAlreadyExists: { message: 'User already exists', statusCode: HttpStatus.BAD_REQUEST },
     passwordMismatch: { message: 'Password and Confirm Password do not match', statusCode: HttpStatus.BAD_REQUEST },
     userNotFound: { message: 'User not found', statusCode: HttpStatus.NOT_FOUND },
     unauthorizedError: { message: 'Invalid credentials', statusCode: HttpStatus.BAD_REQUEST },
-    authenticationFailed:{message: 'Invalid credentials', statusCode: HttpStatus.BAD_REQUEST}
+    authenticationFailed: { message: 'Invalid credentials', statusCode: HttpStatus.BAD_REQUEST },
+    notificationNotFound: { message: 'Notification not found', statusCode: HttpStatus.NOT_FOUND },
+    notificationCreationFailed: { message: 'Failed to create notification', statusCode: HttpStatus.INTERNAL_SERVER_ERROR },
+    notificationUpdateFailed: { message: 'Failed to update notification', statusCode: HttpStatus.INTERNAL_SERVER_ERROR },
+    notificationDeletionFailed: { message: 'Failed to delete notification', statusCode: HttpStatus.INTERNAL_SERVER_ERROR },
+    missingFields: { message: 'Postedby and text fields are required', statusCode: HttpStatus.BAD_REQUEST },
+    noAuthToken: { message: 'Unauthorized: No authentication token provided', statusCode: HttpStatus.UNAUTHORIZED },
+    invalidAuthToken: { message: 'Invalid authentication token', statusCode: HttpStatus.UNAUTHORIZED },
+    unauthorizedPostCreation: { message: 'Unauthorized to create post', statusCode: HttpStatus.UNAUTHORIZED },
+    textMaxLengthExceeded: { message: 'Text must be less than 500 characters', statusCode: HttpStatus.BAD_REQUEST },
+    imageUploadFailed: { message: 'Failed to upload image', statusCode: HttpStatus.INTERNAL_SERVER_ERROR },
+    postNotFound: { message: 'Post not found', statusCode: HttpStatus.NOT_FOUND },
+    unauthorizedPostDeletion: { message: 'Unauthorized to delete post', statusCode: HttpStatus.UNAUTHORIZED },
+    replyCreationFailed: { message: 'Failed to create reply', statusCode: HttpStatus.INTERNAL_SERVER_ERROR },
+    userNotAuthenticated: { message: 'User not authenticated', statusCode: HttpStatus.UNAUTHORIZED },
+    invalidUserId: { message: 'Invalid user ID', statusCode: HttpStatus.BAD_REQUEST },
+    internalServerError: { message: 'Internal server error', statusCode: HttpStatus.INTERNAL_SERVER_ERROR },
 }
