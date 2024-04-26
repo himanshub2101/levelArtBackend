@@ -2,6 +2,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, Model } from 'mongoose';
 
+export type UserType = 'visitors' | 'artist'| 'production';
 
 @Schema({ timestamps: true })
 export class User extends Document {
@@ -34,6 +35,9 @@ export class User extends Document {
 
   @Prop({ default: false })
   isFrozen: boolean; // Indicates if the user's account is frozen
+
+  @Prop({ type: String, enum: ['visitors', 'artist','production'], default: 'artist' })
+  userType: UserType;
 }
 export const UserSchema = SchemaFactory.createForClass(User);
 
