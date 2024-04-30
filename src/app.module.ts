@@ -13,19 +13,16 @@ import { AuthMiddleware } from './auth/auth.middleware';
 import { FollowersModule } from './followers/followers.module';
 import { multerConfig } from './multer.config';
 import { MulterModule } from '@nestjs/platform-express/multer';
-import bodyParser from 'body-parser';
-import { NotificationModule } from './notifications/notification.module';
-import { SearchModule } from './search/search.module';
+const bodyParser = require('body-parser'); // Import bodyParser using CommonJS syntax
 
 @Module({
-  imports: [    MulterModule.register(multerConfig),
+  imports: [    
+    MulterModule.register(multerConfig),
     FollowersModule,
     PostModule, // Add PostModule here
     ConversationModule,
-    NotificationModule,
     AuthModule,
     UserModule,
-    SearchModule,
     MongooseModule.forRoot('mongodb+srv://himanshubaghel7723:p6eoUVJJjvjkasKB@cluster0.tdpw1ax.mongodb.net/'),
     MongooseModule.forFeature([{ name: Posts.name, schema: PostsSchema }]), // Add this line
   ],

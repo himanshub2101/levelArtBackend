@@ -6,12 +6,15 @@ import { ObjectId } from 'mongodb';
 import { User } from 'src/schemas/user.schema';
 import { UserService } from 'src/users/services/user.services';
 import { CreatePostDto } from 'src/dto/posts.dto';
+import { NotificationService } from 'src/notifications/services/notification.service';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectModel(Posts.name) private readonly postModel: Model<PostDocument>,
     private readonly userService: UserService,
+    private readonly notificationService: NotificationService, // Inject NotificationService
+
   ) {}
 
   async create(postData: any): Promise<Posts> {
@@ -45,12 +48,25 @@ export class PostService {
     if (userLikedPost) {
       // Unlike post
       await this.postModel.updateOne({ _id: objectIdPostId }, { $pull: { likes: objectIdUserId } }).exec();
+
+      // Remove like notification if exists
+      await this.notificationService.deleteNotification({ type: 'like', sender: userId, post: postId });
     } else {
       // Like post
       post.likes.push(objectIdUserId);
       await post.save();
+
+      // Create notification for post like
+      await this.notificationService.createNotification(
+        'like', // Type of notification
+        userId, // Sender
+        post.postedBy.toString(), // Recipient
+        postId // Post ID
+      );
+      
     }
   }
+
 
   async replyToPost(postId: string, userId: string, text: string, userProfilePic: string, username: string): Promise<any> {
     const post = await this.postModel.findById(postId);
@@ -74,7 +90,10 @@ export class PostService {
     }
 
     const following = user.followings;
-    return this.postModel.find({ postedBy: { $in: following } }).sort({ createdAt: -1 }).exec();
+    const posts =  this.postModel.find({ postedBy: { $in: following } }).sort({ createdAt: -1 }).exec();
+    console.log('Feed Posts:', posts);
+
+    return posts;
   }
 
   async findByUserId(userId: string): Promise<Posts[]> {

@@ -39,6 +39,8 @@ async createPost(
   @Res() res: Response
 ) {
   try {
+    console.log('Received image file:', file); // Add this line to check the received file
+
     console.log('Request Body:', body);
     const { postedBy, text } = body;
 
@@ -83,8 +85,9 @@ async createPost(
     if (file) {
       console.log('Uploading image...');
       const uploadedResponse = await cloudinary.uploader.upload(file.path);
+      console.log(uploadedResponse)
       img = uploadedResponse.secure_url;
-      console.log('Image uploaded:', img);
+      console.log('Image uploaded:', img);  
     }
 
     // Get the username from the authenticated user
@@ -92,7 +95,7 @@ async createPost(
     const username = authenticatedUser.username; // Assuming the username is stored in the 'username' property
 
     console.log('Creating new post...');
-    const newPost = await this.postService.create({ postedBy, text, img, username }); // Include the username in the post data
+    const newPost = await this.postService.create({ postedBy, text, username,img }); // Include the username in the post data
     console.log('New post created:', newPost);
 
     res.status(201).json(newPost);
@@ -101,6 +104,7 @@ async createPost(
     res.status(500).json({ error: err.message });
   }
 }
+
 
 
 
