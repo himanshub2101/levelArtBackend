@@ -31,15 +31,23 @@ export class PostController {
 
 @UseGuards(AuthGuard)
 @Post('create-post')
-@UseInterceptors(FileInterceptor('img')) 
+@UseInterceptors(FileInterceptor('img', {
+  storage: diskStorage({
+    destination: './uploads', // Destination folder where uploaded files will be stored locally
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, `${uniqueSuffix}-${file.originalname}`);
+    },
+  }),
+}))
 async createPost(
-  @UploadedFile() file: Express.Multer.File,
+  @UploadedFile() file: Express.Multer.File, // Access the uploaded file using @UploadedFile() decorator
   @Body() body: any, // Assuming you have a DTO for creating posts
   @Req() req: Request,
   @Res() res: Response
 ) {
   try {
-    console.log('Received image file:', file); // Add this line to check the received file
+    console.log('Request file:', file.path);
 
     console.log('Request Body:', body);
     const { postedBy, text } = body;
@@ -85,9 +93,8 @@ async createPost(
     if (file) {
       console.log('Uploading image...');
       const uploadedResponse = await cloudinary.uploader.upload(file.path);
-      console.log(uploadedResponse)
       img = uploadedResponse.secure_url;
-      console.log('Image uploaded:', img);  
+      console.log('Image uploaded:', img);
     }
 
     // Get the username from the authenticated user
@@ -95,7 +102,7 @@ async createPost(
     const username = authenticatedUser.username; // Assuming the username is stored in the 'username' property
 
     console.log('Creating new post...');
-    const newPost = await this.postService.create({ postedBy, text, username,img }); // Include the username in the post data
+    const newPost = await this.postService.create({ postedBy, text, img, username }); // Include the username in the post data
     console.log('New post created:', newPost);
 
     res.status(201).json(newPost);
