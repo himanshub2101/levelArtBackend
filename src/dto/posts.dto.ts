@@ -11,6 +11,6 @@ export class CreatePostDto {
 
   @IsOptional()
   @IsUrl()
-  image?: string; // Assuming the image is optional and should be a URL
+  img?: string; // Assuming the image is optional and should be a URL
 
 }

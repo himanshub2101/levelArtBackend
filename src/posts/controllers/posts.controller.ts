@@ -31,14 +31,24 @@ export class PostController {
 
 @UseGuards(AuthGuard)
 @Post('create-post')
-@UseInterceptors(FileInterceptor('img')) 
+@UseInterceptors(FileInterceptor('img', {
+  storage: diskStorage({
+    destination: './uploads', // Destination folder where uploaded files will be stored locally
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, `${uniqueSuffix}-${file.originalname}`);
+    },
+  }),
+}))
 async createPost(
-  @UploadedFile() file: Express.Multer.File,
+  @UploadedFile() file: Express.Multer.File, // Access the uploaded file using @UploadedFile() decorator
   @Body() body: any, // Assuming you have a DTO for creating posts
   @Req() req: Request,
   @Res() res: Response
 ) {
   try {
+    console.log('Request file:', file.path);
+
     console.log('Request Body:', body);
     const { postedBy, text } = body;
 
@@ -101,6 +111,7 @@ async createPost(
     res.status(500).json({ error: err.message });
   }
 }
+
 
 
 

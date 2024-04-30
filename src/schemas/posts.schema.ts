@@ -1,11 +1,10 @@
-// posts.schema.ts
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Posts extends Document {
-  @Prop()
-  postedBy: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'User' }) // Reference to User model
+  postedBy: Types.ObjectId; // Reference to User model
 
   @Prop()
   text: string;
@@ -23,11 +22,7 @@ export class Posts extends Document {
     userProfilePic: string;
     username: string;
   }[];
-  
-  @Prop({ readonly: true }) // Make username read-only
-  username: string;
 }
-
 
 export const PostsSchema = SchemaFactory.createForClass(Posts);
 export type PostDocument = Posts & Document; // Define PostDocument type
