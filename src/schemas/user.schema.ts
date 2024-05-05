@@ -9,13 +9,13 @@ export class User extends Document {
   @Prop({required: true})
   username: string;
 
-  @Prop()
+  @Prop({ default: '' })
   fullname: string;
 
-  @Prop()
+  @Prop({ default: '' })
   gender: string;
 
-  @Prop()
+  @Prop({ default: '' })
   pronouns: string;
 
   @Prop({required: true})
