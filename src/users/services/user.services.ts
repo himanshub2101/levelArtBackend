@@ -11,7 +11,7 @@ export class UserService {
   constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {}
 
   async register(signUpDto: User): Promise<User> {
-    const { username, password, email, phonenumber,confirmpassword,userType } = signUpDto;
+    const { username, password, email, phonenumber,confirmpassword,userType, fullname, gender, pronouns } = signUpDto;
 
     // Check if the email is already registered
     const existingUser = await this.userModel.findOne({ email }).exec();
@@ -23,7 +23,7 @@ export class UserService {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create and save the user
-    const user = new this.userModel({ username, password: hashedPassword, email, phonenumber,confirmpassword,userType });
+    const user = new this.userModel({ username, password: hashedPassword, email, phonenumber,confirmpassword,userType,fullname,gender, pronouns });
     const newUser = await user.save();
 
     const { confirmpassword: _, ...registeredUser } = newUser.toObject();

@@ -13,6 +13,7 @@ import { AuthMiddleware } from './auth/auth.middleware';
 import { FollowersModule } from './followers/followers.module';
 import { multerConfig } from './multer.config';
 import { MulterModule } from '@nestjs/platform-express/multer';
+import { SearchModule } from './search/search.module';
 const bodyParser = require('body-parser'); // Import bodyParser using CommonJS syntax
 
 @Module({
@@ -23,6 +24,7 @@ const bodyParser = require('body-parser'); // Import bodyParser using CommonJS s
     ConversationModule,
     AuthModule,
     UserModule,
+    SearchModule,
     MongooseModule.forRoot('mongodb+srv://himanshubaghel7723:p6eoUVJJjvjkasKB@cluster0.tdpw1ax.mongodb.net/'),
     MongooseModule.forFeature([{ name: Posts.name, schema: PostsSchema }]), // Add this line
   ],

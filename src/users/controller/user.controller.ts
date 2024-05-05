@@ -6,7 +6,6 @@ import { User } from "src/schemas/user.schema";
 export class UserController {
     constructor(private userService: UserService ){}
     
-    @Post('/register')
     @Post('register')
     async registerUser(@Body() signUpDto: User): Promise<User> {
       return this.userService.register(signUpDto);
