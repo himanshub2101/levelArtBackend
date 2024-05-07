@@ -37,35 +37,25 @@ export class PostService {
   async likeUnlikePost(postId: string, userId: string): Promise<void> {
     const objectIdPostId = new ObjectId(postId);
     const objectIdUserId = new ObjectId(userId);
-
+  
     const post = await this.findById(postId);
     if (!post) {
       throw new NotFoundException('Post not found');
     }
-
+  
     const userLikedPost = post.likes.includes(objectIdUserId);
-
+  
     if (userLikedPost) {
       // Unlike post
       await this.postModel.updateOne({ _id: objectIdPostId }, { $pull: { likes: objectIdUserId } }).exec();
-
-      // Remove like notification if exists
-      await this.notificationService.deleteNotification({ type: 'like', sender: userId, post: postId });
     } else {
       // Like post
       post.likes.push(objectIdUserId);
       await post.save();
-
-      // Create notification for post like
-      await this.notificationService.createNotification(
-        'like', // Type of notification
-        userId, // Sender
-        post.postedBy.toString(), // Recipient
-        postId // Post ID
-      );
-      
     }
   }
+  
+  
 
 
   async replyToPost(postId: string, userId: string, text: string, userProfilePic: string, username: string): Promise<any> {
