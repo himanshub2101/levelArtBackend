@@ -239,11 +239,20 @@ async createPost(
     try {
       // Extract the user ID from the request object
       const userId = req['user'].sub;
-      console.log("userId:",postId)
+
+      // Add logs
+      console.log(`User ${userId} is attempting to like/unlike post ${postId}`);
+
+      // Call the service method to like/unlike the post
       await this.postService.likeUnlikePost(postId, userId);
+
+      // Add logs
+      console.log(`Post ${postId} liked/unliked successfully`);
 
       return { message: 'Post liked/unliked successfully' };
     } catch (error) {
+      // Add error logs
+      console.error('Error:', error.message);
       throw error; // Let the global exception filter handle the error
     }
   }

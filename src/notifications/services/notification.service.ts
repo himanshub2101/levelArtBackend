@@ -92,6 +92,7 @@ export class NotificationService {
 
   async createNotification(type: string, sender: string, recipient: string, postId: string): Promise<Notification> {
     try {
+      console.log(`Creating notification of type ${type} from sender ${sender} to recipient ${recipient} for post ${postId}`);
       const newNotification = new this.notificationModel({
         type,
         sender,
@@ -99,8 +100,11 @@ export class NotificationService {
         postId,
         read: false, // Default notification status to unread
       });
-      return await newNotification.save();
+      const savedNotification = await newNotification.save();
+      console.log('Notification created successfully:', savedNotification);
+      return savedNotification;
     } catch (error) {
+      console.error('Error creating notification:', error.message);
       throw new Error('Failed to create notification');
     }
   }
